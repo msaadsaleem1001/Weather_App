@@ -7,7 +7,7 @@ class WeatherItem extends StatelessWidget {
     required this.value, required this.text, required this.unit, required this.imageUrl,
   }) : super(key: key);
 
-  final int value;
+  final String value;
   final String text;
   final String unit;
   final String imageUrl;
@@ -35,7 +35,7 @@ class WeatherItem extends StatelessWidget {
         const SizedBox(
           height: 8,
         ),
-        Text(value.toString() + unit, style: const TextStyle(
+        Text(value + unit, style: const TextStyle(
           fontWeight: FontWeight.bold,
         ),)
       ],

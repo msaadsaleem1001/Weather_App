@@ -27,9 +27,7 @@ class _ExceptionWidgetState extends State<ExceptionWidget> {
         Center(
           child: Text(
               widget.msg,
-              style: AppTextStyles.footerStyle(
-                  color: AppColors.readableContent
-              ),
+              style: AppTextStyles.readableStyle(16),
               textAlign: TextAlign.center
           ),),
         const SizedBox(height: 20),

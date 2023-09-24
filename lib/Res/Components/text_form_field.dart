@@ -70,19 +70,7 @@ class TextFormFieldReUseAble extends StatelessWidget {
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(10)),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide(
-              color: AppColors.errorBorder,
-              width: 2.5,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide(
-                color: AppColors.errorBorder,
-                width: 1,
-              ))),
+              ),
       validator: (value) => validator!(value),
       onFieldSubmitted: (value) => onFieldSubmitted!(value),
       onTapOutside: onTapOutSide,

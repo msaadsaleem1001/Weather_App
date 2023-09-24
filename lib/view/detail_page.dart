@@ -1,60 +1,35 @@
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:weather_app/Res/Components/weather_item.dart';
+import 'package:weather_app/Res/assets/app_assets.dart';
 import 'package:weather_app/Res/colors/app_colors.dart';
-import 'package:weather_app/view/selection.dart';
+import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
+import 'package:weather_app/ViewModel/HomeModal/home_modal.dart';
 
 class DetailScreen extends StatefulWidget {
-  final List consolidatedWeatherList;
-  final int selectedId;
-  final String location;
-
-  const DetailScreen(
-      {Key? key,
-      required this.consolidatedWeatherList,
-      required this.selectedId,
-      required this.location})
-      : super(key: key);
-
+  const DetailScreen({Key? key}) : super(key: key);
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  String imageUrl = '';
+  final homeModal = Get.put(HomeModal());
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
-    //Create a shader linear gradient
-    final Shader linearGradient = const LinearGradient(
-      colors: <Color>[Color(0xffABCFF2), Color(0xff9AC6F3)],
-    ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
-
-    int selectedIndex = widget.selectedId;
-    var weatherStateName =
-        widget.consolidatedWeatherList[selectedIndex]['weather_state_name'];
-    imageUrl = weatherStateName.replaceAll(' ', '').toLowerCase();
-
     return Scaffold(
       backgroundColor: AppColors.secondaryColor,
       appBar: AppBar(
+        foregroundColor: AppColors.white,
         centerTitle: true,
         backgroundColor: AppColors.secondaryColor,
         elevation: 0.0,
-        title: Text(widget.location),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const SelectionScreen()));
-                },
-                icon: const Icon(Icons.settings)),
-          )
-        ],
+        title: Obx(() => Text(homeModal.selectedCity.value, style: AppTextStyles.headerTextStyle(
+          color: AppColors.white,
+          fontSize: 25
+        ))),
       ),
       body: Stack(
         alignment: Alignment.center,
@@ -66,75 +41,75 @@ class _DetailScreenState extends State<DetailScreen> {
             child: SizedBox(
               height: 150,
               width: 400,
-              child: ListView.builder(
+              child: Obx(() => ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: widget.consolidatedWeatherList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    var futureWeatherName = widget
-                        .consolidatedWeatherList[index]['weather_state_name'];
-                    var weatherURL =
-                        futureWeatherName.replaceAll(' ', '').toLowerCase();
-                    var parsedDate = DateTime.parse(widget
-                        .consolidatedWeatherList[index]['applicable_date']);
-                    var newDate =
-                        DateFormat('EEEE').format(parsedDate).substring(0, 3);
-
-                    return Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      margin: const EdgeInsets.only(right: 20),
-                      width: 80,
-                      decoration: BoxDecoration(
-                          color: index == selectedIndex
-                              ? Colors.white
-                              : const Color(0xff9ebcf9),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(10)),
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(0, 1),
-                              blurRadius: 5,
-                              color: Colors.blue.withOpacity(.3),
-                            )
-                          ]),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${widget.consolidatedWeatherList[index]['the_temp']
-                                    .round()}C",
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: index == selectedIndex
-                                  ? Colors.blue
-                                  : Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Image.asset(
-                            'assets/' + weatherURL + ".png",
-                            width: 40,
-                          ),
-                          Text(
-                            newDate,
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: index == selectedIndex
-                                  ? Colors.blue
-                                  : Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                  itemCount: homeModal.foreCast.length,
+                  itemBuilder: (context, index) {
+                    return Obx(() => InkWell(
+                      enableFeedback: false,
+                      onTap: (){
+                        homeModal.selectedIndex.value = index;
+                        homeModal.windSpeed.value = homeModal.foreCast[index].windSpeedMph;
+                        homeModal.humidity.value = homeModal.foreCast[index].humidity;
+                        homeModal.temp.value = homeModal.foreCast[index].tempF;
+                        homeModal.maxTemp.value = homeModal.foreCast[index].tempMax;
+                        homeModal.imageSelected.value = homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        margin: const EdgeInsets.only(right: 20),
+                        width: 100,
+                        decoration: BoxDecoration(
+                            color: index == homeModal.selectedIndex.value
+                                ? Colors.white
+                                : const Color(0xff9ebcf9),
+                            borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                offset: const Offset(0, 1),
+                                blurRadius: 5,
+                                color: Colors.blue.withOpacity(.3),
+                              )
+                            ]),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Obx(() => Text(
+                                "${homeModal.foreCast[index].tempF}C",
+                                style: AppTextStyles.montserratStyle(
+                                    color: index == homeModal.selectedIndex.value
+                                        ? Colors.blue
+                                        : Colors.white,
+                                    fontSize: 16)
+                            )),
+                            Obx(() => Image.asset(
+                              homeModal.foreCast[index].weather == ''
+                                  ?AppAssets.clear
+                                  : homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString(),
+                              width: 50,
+                              height: 50,
+                            )),
+                            Obx(() => Text(
+                                homeModal.foreCast[index].date,
+                                style: AppTextStyles.montserratStyle(
+                                    color: index == homeModal.selectedIndex.value
+                                        ? Colors.blue
+                                        : Colors.white,
+                                    fontSize: 10)
+                            )),
+                          ],
+                        ),
                       ),
-                    );
-                  }),
+                    ));
+                  })),
             ),
           ),
           Positioned(
             bottom: 0,
             left: 0,
             child: Container(
-              height: size.height * .55,
+              height: size.height * .6,
               width: size.width,
               decoration: const BoxDecoration(
                   color: Colors.white,
@@ -172,27 +147,15 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Positioned(
-                            top: -40,
+                          Obx(() => Positioned(
+                            top: -30,
                             left: 20,
                             child: Image.asset(
-                              'assets/' + imageUrl + '.png',
-                              width: 150,
+                              homeModal.imageSelected.toString(),
+                              width: 120,
+                              height: 120,
                             ),
-                          ),
-                          Positioned(
-                              top: 120,
-                              left: 30,
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  weatherStateName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              )),
+                          )),
                           Positioned(
                             bottom: 20,
                             left: 20,
@@ -204,31 +167,23 @@ class _DetailScreenState extends State<DetailScreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  WeatherItem(
+                                  Obx(() => WeatherItem(
                                     text: 'Wind Speed',
-                                    value: widget
-                                        .consolidatedWeatherList[selectedIndex]
-                                            ['wind_speed']
-                                        .round(),
-                                    unit: 'km/h',
-                                    imageUrl: 'assets/windspeed.png',
-                                  ),
-                                  WeatherItem(
+                                    value: homeModal.windSpeed.value,
+                                    unit: 'MPH',
+                                    imageUrl: AppAssets.windSpeed,
+                                  )),
+                                  Obx(() => WeatherItem(
                                       text: 'Humidity',
-                                      value: widget.consolidatedWeatherList[
-                                              selectedIndex]['humidity']
-                                          .round(),
+                                      value: homeModal.humidity.value,
                                       unit: '',
-                                      imageUrl: 'assets/humidity.png'),
-                                  WeatherItem(
+                                      imageUrl: AppAssets.humidity)),
+                                  Obx(() => WeatherItem(
                                     text: 'Max Temp',
-                                    value: widget
-                                        .consolidatedWeatherList[selectedIndex]
-                                            ['max_temp']
-                                        .round(),
+                                    value: homeModal.maxTemp.value,
                                     unit: 'C',
-                                    imageUrl: 'assets/max-temp.png',
-                                  ),
+                                    imageUrl: AppAssets.maxTemp,
+                                  )),
                                 ],
                               ),
                             ),
@@ -239,27 +194,15 @@ class _DetailScreenState extends State<DetailScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  widget.consolidatedWeatherList[selectedIndex]
-                                          ['the_temp']
-                                      .round()
-                                      .toString(),
+                                Obx(() => Text(
+                                  '${homeModal.temp.value}C',
                                   style: TextStyle(
-                                    fontSize: 80,
+                                    fontSize: 60,
                                     fontWeight: FontWeight.bold,
                                     foreground: Paint()
-                                      ..shader = linearGradient,
+                                      ..shader = AppColors.linearGradient,
                                   ),
-                                ),
-                                Text(
-                                  'o',
-                                  style: TextStyle(
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.bold,
-                                    foreground: Paint()
-                                      ..shader = linearGradient,
-                                  ),
-                                ),
+                                ),)
                               ],
                             ),
                           ),
@@ -268,39 +211,26 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   ),
                   Positioned(
-                      top: 300,
+                      top: 270,
                       left: 20,
+                      bottom: 10,
                       child: SizedBox(
-                        height: 200,
-                        width: size.width * .9,
+                        width: size.width*.9,
+                        height: 150,
                         child: ListView.builder(
                             scrollDirection: Axis.vertical,
-                            itemCount:
-                            widget.consolidatedWeatherList.length,
-                            itemBuilder:
-                                (BuildContext context, int index) {
-                              var futureWeatherName =
-                              widget.consolidatedWeatherList[index]
-                              ['weather_state_name'];
-                              var futureImageURL = futureWeatherName
-                                  .replaceAll(' ', '')
-                                  .toLowerCase();
-                              var myDate = DateTime.parse(
-                                  widget.consolidatedWeatherList[index]
-                                  ['applicable_date']);
-                              var currentDate =
-                              DateFormat('d MMMM, EEEE')
-                                  .format(myDate);
-                              return Container(
+                            itemCount: homeModal.foreCast.length,
+                            itemBuilder: (context, index) {
+                              return Obx(() => Container(
                                 margin: const EdgeInsets.only(
-                                    left: 10,
                                     top: 10,
-                                    right: 10,
                                     bottom: 5),
-                                height: 80,
+                                height: 50,
                                 width: size.width,
                                 decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: homeModal.selectedIndex.value == index
+                                        ?AppColors.primaryColor
+                                        :AppColors.primaryColor.withOpacity(.2),
                                     borderRadius:
                                     const BorderRadius.all(
                                         Radius.circular(10)),
@@ -323,65 +253,53 @@ class _DetailScreenState extends State<DetailScreen> {
                                     CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        currentDate,
-                                        style: const TextStyle(
-                                          color: Color(0xff6696f5),
-                                        ),
+                                          homeModal.foreCast[index].date,
+                                          style: homeModal.selectedIndex.value == index
+                                              ?AppTextStyles.montserratStyle(
+                                              color: AppColors.white,
+                                              fontSize: 12)
+                                              :AppTextStyles.readableStyle(12),
                                       ),
                                       Row(
                                         children: [
                                           Text(
-                                            widget
-                                                .consolidatedWeatherList[
-                                            index]['max_temp']
-                                                .round()
-                                                .toString(),
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 30,
-                                              fontWeight:
-                                              FontWeight.w600,
-                                            ),
-                                          ),
-                                          const Text(
-                                            '/',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 30,
-                                            ),
+                                              '${homeModal.foreCast[index].tempMin}C',
+                                              style: homeModal.selectedIndex.value == index
+                                                  ?AppTextStyles.montserratStyle(
+                                                  color: AppColors.white,
+                                                  fontSize: 14)
+                                                  :AppTextStyles.readableStyle(14),
+
                                           ),
                                           Text(
-                                            widget
-                                                .consolidatedWeatherList[
-                                            index]['min_temp']
-                                                .round()
-                                                .toString(),
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 25,
-                                            ),
+                                              '/',
+                                              style: homeModal.selectedIndex.value == index
+                                                  ?AppTextStyles.montserratStyle(
+                                                  color: AppColors.white,
+                                                  fontSize: 16)
+                                                  :AppTextStyles.readableStyle(16),
+                                          ),
+                                          Text(
+                                              '${homeModal.foreCast[index].tempMax}C',
+                                              style: homeModal.selectedIndex.value == index
+                                                  ?AppTextStyles.montserratStyle(
+                                                  color: AppColors.white,
+                                                  fontSize: 16)
+                                                  :AppTextStyles.readableStyle(16),
                                           ),
                                         ],
                                       ),
-                                      Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            'assets/' +
-                                                futureImageURL +
-                                                '.png',
-                                            width: 30,
-                                          ),
-                                          Text(widget.consolidatedWeatherList[
-                                          index]
-                                          ['weather_state_name']),
-                                        ],
-                                      )
+                                      Image.asset(
+                                        homeModal.foreCast[index].weather == ''
+                                            ?AppAssets.clear
+                                            : homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString(),
+                                        width: 30,
+                                        height: 30,
+                                      ),
                                     ],
                                   ),
                                 ),
-                              );
+                              ));
                             }),
                       ))
                 ],

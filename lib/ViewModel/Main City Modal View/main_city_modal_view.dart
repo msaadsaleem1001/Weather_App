@@ -109,6 +109,7 @@ class MainModal extends GetxController{
   void insertUserSelectedListToDB() async{
     final homeModal = Get.put(HomeModal());
     homeModal.userList.clear();
+    await db.deleteAll();
     for(var val in citiesList){
       if(val.isSelected){
         homeModal.userList.add(DatabaseCityModal(

@@ -1,16 +1,19 @@
 
-import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:weather_app/Res/colors/app_colors.dart';
+import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
 
 
 class CheckInternetConnectionWidget extends StatelessWidget {
   final AsyncSnapshot<ConnectivityResult> snapshot;
   final Widget widget ;
+  final Size screenSize;
   const CheckInternetConnectionWidget({
     Key? key,
     required this.snapshot,
-    required this.widget
+    required this.widget,
+    required this.screenSize
   }) : super(key: key);
 
   @override
@@ -20,61 +23,22 @@ class CheckInternetConnectionWidget extends StatelessWidget {
         final state = snapshot.data!;
         switch (state) {
           case ConnectivityResult.none:
-            return const Center(child: Text('Not connected'));
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              height: screenSize.height*.03,
+              width: screenSize.width*.9,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: AppColors.error,
+              ),
+              child: Center(child: Text('No Internet Connection',
+                style: AppTextStyles.normalStyle(color: AppColors.white, fontSize: 14),)),
+            );
           default:
             return  widget;
         }
       default:
         return const Text('');
     }
-  }
-}
-
-
-class InternetConnectivityScreen extends StatelessWidget {
-  InternetConnectivityScreen({Key? key}) : super(key: key);
-
-  List<Color> colors = [Colors.redAccent, Colors.purple , Colors.pinkAccent, Colors.black, Colors.teal, Colors.green, Colors.grey];
-  Random random = Random();
-
-  @override
-  Widget build(BuildContext context) {
-    Connectivity connectivity =  Connectivity() ;
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Internet Connectivity'),
-      ),
-      body: SafeArea(
-        child: StreamBuilder<ConnectivityResult>(
-          stream: connectivity.onConnectivityChanged,
-          builder: (_, snapshot){
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: CheckInternetConnectionWidget(
-                snapshot: snapshot,
-                widget: Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                          itemCount: 120,
-                          itemBuilder: (context, index){
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Container(
-                                  color: colors[random.nextInt(7)],
-                                  height: 100,
-                                  child: Center(child: Text(index.toString()))),
-                            );
-                          }),
-                    )
-                  ],
-                ),
-              ),
-            ) ;
-          },
-        ),
-      ),
-    );
   }
 }

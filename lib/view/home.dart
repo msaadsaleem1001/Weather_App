@@ -1,13 +1,17 @@
-import 'dart:convert';
+// ignore_for_file: unrelated_type_equality_checks
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
+import 'package:weather_app/Data/Response/status.dart';
+import 'package:weather_app/Network%20Connectivity/connectivity_checker.dart';
+import 'package:weather_app/Res/Components/error_widget.dart';
 import 'package:weather_app/Res/Components/weather_item.dart';
+import 'package:weather_app/Res/Routes/routes_names.dart';
 import 'package:weather_app/Res/assets/app_assets.dart';
 import 'package:weather_app/Res/colors/app_colors.dart';
+import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
 import 'package:weather_app/ViewModel/HomeModal/home_modal.dart';
-import 'package:weather_app/view/detail_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,89 +20,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final homeModal = Get.put(HomeModal());
-
-  int temperature = 0;
-  int maxTemp = 0;
-  String weatherStateName = 'Loading..';
-  int humidity = 0;
-  int windSpeed = 0;
-
-  var currentDate = 'Loading..';
-  String imageUrl = '';
-  int woeid =
-      44418; //This is the Where on Earth Id for London which is our default city
-  String location = 'London'; //Our default city
-
-  //get the cities and selected cities data
-  List<String> cities = [
-    'London'
-  ]; //the list to hold our selected cities. Deafult is London
-
-  List consolidatedWeatherList = []; //To hold our weather data after api call
-
-  //Api calls url
-  String searchLocationUrl =
-      'https://www.metaweather.com/api/location/search/?query='; //To get the woeid
-  String searchWeatherUrl =
-      'https://www.metaweather.com/api/location/'; //to get weather details using the woeid
-
-  //Get the Where on earth id
-  void fetchLocation(String location) async {
-    var searchResult = await http.get(Uri.parse(searchLocationUrl + location));
-    var result = json.decode(searchResult.body)[0];
-    setState(() {
-      woeid = result['woeid'];
-    });
-  }
-
-  void fetchWeatherData() async {
-    var weatherResult =
-        await http.get(Uri.parse(searchWeatherUrl + woeid.toString()));
-    var result = json.decode(weatherResult.body);
-    var consolidatedWeather = result['consolidated_weather'];
-
-    setState(() {
-      for (int i = 0; i < 7; i++) {
-        consolidatedWeather.add(consolidatedWeather[
-            i]); //this takes the consolidated weather for the next six days for the location searched
-      }
-      //The index 0 referes to the first entry which is the current day. The next day will be index 1, second day index 2 etc...
-      temperature = consolidatedWeather[0]['the_temp'].round();
-      weatherStateName = consolidatedWeather[0]['weather_state_name'];
-      humidity = consolidatedWeather[0]['humidity'].round();
-      windSpeed = consolidatedWeather[0]['wind_speed'].round();
-      maxTemp = consolidatedWeather[0]['max_temp'].round();
-
-      //date formatting
-      var myDate = DateTime.parse(consolidatedWeather[0]['applicable_date']);
-      currentDate = DateFormat('EEEE, d MMMM').format(myDate);
-
-      //set the image url
-      imageUrl = weatherStateName
-          .replaceAll(' ', '')
-          .toLowerCase(); //remove any spaces in the weather state name
-      //and change to lowercase because that is how we have named our images.
-
-      consolidatedWeatherList = consolidatedWeather
-          .toSet()
-          .toList(); //Remove any instances of dublicates from our
-      //consolidated weather LIST
-    });
-  }
 
   @override
   void initState() {
-    // fetchLocation(cities[0]);
-    // fetchWeatherData();
-    //For all the selected cities from our City model, extract the city and add it to our original cities list
-    // for (int i = 0; i < selectedCities.length; i++) {
-    //   cities.add(selectedCities[i].city);
-    // }
-    for(var val in homeModal.userList){
-      print(val.cityName);
-    }
+    homeModal.selectedCity.value = homeModal.userList[0].cityName;
+    homeModal.getWeatherForSpecific(
+        homeModal.userList[0].lat, homeModal.userList[0].lon);
+    homeModal.getWeatherForeCast(
+        homeModal.userList[0].lat, homeModal.userList[0].lon);
     super.initState();
   }
 
@@ -112,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     //Create a size variable for the media query
     Size screenSize = MediaQuery.of(context).size;
-
+    Connectivity connectivity =  Connectivity() ;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -139,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               //our location dropdown
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
@@ -148,251 +79,325 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     width: 4,
                   ),
-                  DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                        value: location,
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        items: cities.map((String location) {
-                          return DropdownMenuItem(
-                              value: location, child: Text(location));
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            location = newValue!;
-                            fetchLocation(location);
-                            fetchWeatherData();
-                          });
-                        }),
-                  )
+                  Obx(() => PopupMenuButton(
+                      onSelected: (val) {
+                        if (val == homeModal.userList.length) {
+                          Get.back();
+                          Get.toNamed(RouteNames.selectionScreen);
+                        } else {
+                          homeModal.selectedCity.value =
+                              homeModal.userList[val].cityName;
+                          homeModal.getWeatherForSpecific(
+                              homeModal.userList[val].lat,
+                              homeModal.userList[val].lon);
+                          homeModal.getWeatherForeCast(
+                              homeModal.userList[val].lat,
+                              homeModal.userList[val].lon);
+                        }
+                      },
+                      enableFeedback: false,
+                      itemBuilder: (context) {
+                        return List.generate(
+                          homeModal.userList.length + 1,
+                          (index) => PopupMenuItem(
+                              value: index,
+                              child: ListTile(
+                                title: index == homeModal.userList.length
+                                    ? const Text('Select Location')
+                                    : Text(homeModal.userList[index].cityName),
+                              )),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            homeModal.selectedCity.value,
+                            style: AppTextStyles.headerTextStyle(
+                                color: AppColors.black),
+                          ),
+                          const Icon(Icons.keyboard_arrow_down),
+                        ],
+                      )),
+                  ),
                 ],
               )
             ],
           ),
         ),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              location,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 30.0,
-              ),
-            ),
-            Text(
-              currentDate,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 16.0,
-              ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            Container(
-              width: screenSize.width,
-              height: 200,
-              decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryColor.withOpacity(.5),
-                      offset: const Offset(0, 25),
-                      blurRadius: 10,
-                      spreadRadius: -12,
-                    )
-                  ]),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    top: -40,
-                    left: 20,
-                    child: imageUrl == ''
-                        ? const Text('')
-                        : Image.asset(
-                            'assets/images/$imageUrl.png',
-                            width: 150,
-                          ),
-                  ),
-                  Positioned(
-                    bottom: 30,
-                    left: 20,
-                    child: Text(
-                      weatherStateName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
+      body: Obx( () =>
+      homeModal.rxStatusCode == Status.LOADING
+          ? const Center(child: CircularProgressIndicator())
+          : homeModal.rxStatusCode == Status.COMPLETED
+          ? Stack(
+        children: [
+          Positioned(
+              top: 0,
+              child: StreamBuilder<ConnectivityResult>(
+                stream: connectivity.onConnectivityChanged,
+                builder: (_, snapshot){
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: CheckInternetConnectionWidget(
+                      snapshot: snapshot,
+                      widget: const SizedBox(),
+                      screenSize: screenSize,
                     ),
-                  ),
-                  Positioned(
-                    top: 20,
-                    right: 20,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            temperature.toString(),
-                            style: TextStyle(
-                              fontSize: 80,
-                              fontWeight: FontWeight.bold,
-                              foreground: Paint()..shader = AppColors.linearGradient,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'o',
-                          style: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            foreground: Paint()..shader = AppColors.linearGradient,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
+                  ) ;
+                },
               ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 30,
+              left: 20,
+              right: 20,
+              bottom: 10
             ),
-            const SizedBox(
-              height: 50,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  WeatherItem(
-                    text: 'Wind Speed',
-                    value: windSpeed,
-                    unit: 'km/h',
-                    imageUrl: AppAssets.windSpeed
-                  ),
-                  WeatherItem(
-                      text: 'Humidity',
-                      value: humidity,
-                      unit: '',
-                      imageUrl: AppAssets.humidity
-                  ),
-                  WeatherItem(
-                    text: 'Wind Speed',
-                    value: maxTemp,
-                    unit: 'C',
-                    imageUrl: AppAssets.maxTemp,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Today',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                Obx(() => Text(homeModal.currentWeather[0].name,
+                    style: AppTextStyles.montserratStyle(
+                        color: AppColors.black, fontSize: 16))),
+                Obx(() => Text(
+                    '${homeModal.currentWeather[0].region}, ${homeModal.currentWeather[0].country}',
+                    style: AppTextStyles.readableStyle(14))),
+                Obx(() => Text(
+                  'Last Updated: ${homeModal.currentWeather[0].lastUpdated}',
+                  style: AppTextStyles.readableStyle(14),
+                )),
+                const SizedBox(
+                  height: 30,
+                ),
+                Container(
+                  width: screenSize.width,
+                  height: 200,
+                  decoration: BoxDecoration(
+                      color: AppColors.primaryColor,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                          AppColors.primaryColor.withOpacity(.5),
+                          offset: const Offset(0, 25),
+                          blurRadius: 10,
+                          spreadRadius: -12,
+                        )
+                      ]),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Obx(() => Positioned(
+                        top: 0,
+                        left: 10,
+                        child: homeModal
+                            .currentWeather[0].icon.isEmpty
+                            ? const SizedBox()
+                            : Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    'https:${homeModal.currentWeather[0].icon}'),
+                                fit: BoxFit.fill,
+                              )),
+                        ),
+                      )),
+                      Obx(() => Positioned(
+                        bottom: 30,
+                        left: 20,
+                        child: Text(
+                            homeModal.currentWeather[0].text,
+                            style: AppTextStyles.montserratStyle(
+                                color: AppColors.white,
+                                fontSize: 20)),
+                      )),
+                      Positioned(
+                        top: 20,
+                        right: 20,
+                        child: Row(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding:
+                              const EdgeInsets.only(top: 4.0),
+                              child: Obx(() => Text(
+                                homeModal.currentWeather[0].tempC,
+                                style: TextStyle(
+                                  fontSize: 80,
+                                  fontWeight: FontWeight.bold,
+                                  foreground: Paint()
+                                    ..shader =
+                                        AppColors.linearGradient,
+                                ),
+                              )),
+                            ),
+                            Text(
+                              'o',
+                              style: TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                foreground: Paint()
+                                  ..shader = AppColors.linearGradient,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  'Next 7 Days',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
-                      color: AppColors.primaryColor),
+                const SizedBox(
+                  height: 30,
                 ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() => WeatherItem(
+                          text: 'Wind Speed',
+                          value: homeModal.currentWeather[0].windKph,
+                          unit: 'km/h',
+                          imageUrl: AppAssets.windSpeed)),
+                      Obx(() => WeatherItem(
+                          text: 'Humidity',
+                          value: homeModal.currentWeather[0].humidity,
+                          unit: '',
+                          imageUrl: AppAssets.humidity)),
+                      Obx(() => WeatherItem(
+                        text: 'Max Temp',
+                        value:
+                        homeModal.currentWeather[0].maxTempC,
+                        unit: 'C',
+                        imageUrl: AppAssets.maxTemp,
+                      )),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Today',
+                        style: AppTextStyles.readableStyle(16)),
+                    Text('Next 21 Days',
+                        style: AppTextStyles.readableStyle(16)),
+                  ],
+                ),
+                Obx(() => Expanded(
+                    child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: homeModal.foreCast.length,
+                        itemBuilder: (context, index) {
+                          return Obx(() => GestureDetector(
+                            onTap: () {
+                              homeModal.selectedIndex.value =
+                                  index;
+                              homeModal.windSpeed.value =
+                                  homeModal.foreCast[index]
+                                      .windSpeedMph;
+                              homeModal.humidity.value = homeModal
+                                  .foreCast[index].humidity;
+                              homeModal.temp.value =
+                                  homeModal.foreCast[index].tempF;
+                              homeModal.maxTemp.value = homeModal
+                                  .foreCast[index].tempMax;
+                              homeModal.imageSelected.value =
+                                  homeModal.weatherImg[homeModal
+                                      .foreCast[index].weather
+                                      .toString()]
+                                      .toString();
+                              Get.toNamed(
+                                  RouteNames.detailScreen);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 10),
+                              margin: const EdgeInsets.only(
+                                  right: 20, bottom: 10, top: 10),
+                              width: 100,
+                              decoration: BoxDecoration(
+                                  color: index == 0
+                                      ? AppColors.primaryColor
+                                      : AppColors.white,
+                                  borderRadius:
+                                  const BorderRadius.all(
+                                      Radius.circular(10)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 5,
+                                      color: index == 0
+                                          ? AppColors.primaryColor
+                                          : Colors.black54
+                                          .withOpacity(.2),
+                                    ),
+                                  ]),
+                              child: Column(
+                                mainAxisAlignment:
+                                MainAxisAlignment
+                                    .spaceBetween,
+                                children: [
+                                  Text(
+                                      '${homeModal.foreCast[index].tempF}C',
+                                      style: AppTextStyles
+                                          .montserratStyle(
+                                          color: index == 0
+                                              ? Colors.white
+                                              : AppColors
+                                              .primaryColor,
+                                          fontSize: 16)),
+                                  Image.asset(
+                                    homeModal.foreCast[index]
+                                        .weather ==
+                                        ''
+                                        ? AppAssets.clear
+                                        : homeModal
+                                        .weatherImg[homeModal
+                                        .foreCast[index]
+                                        .weather
+                                        .toString()]
+                                        .toString(),
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                  Text(
+                                      homeModal
+                                          .foreCast[index].date,
+                                      style: AppTextStyles
+                                          .montserratStyle(
+                                          color: index == 0
+                                              ? Colors.white
+                                              : AppColors
+                                              .primaryColor,
+                                          fontSize: 10))
+                                ],
+                              ),
+                            ),
+                          ));
+                        }))),
               ],
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            Expanded(
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: consolidatedWeatherList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      String today = DateTime.now().toString().substring(0, 10);
-                      var selectedDay =
-                          consolidatedWeatherList[index]['applicable_date'];
-                      var futureWeatherName =
-                          consolidatedWeatherList[index]['weather_state_name'];
-                      var weatherUrl =
-                          futureWeatherName.replaceAll(' ', '').toLowerCase();
-                      var parsedDate = DateTime.parse(
-                          consolidatedWeatherList[index]['applicable_date']);
-                      var newDate = DateFormat('EEEE')
-                          .format(parsedDate)
-                          .substring(0, 3); //format date
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(consolidatedWeatherList: consolidatedWeatherList, selectedId: index, location: location,)));
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          margin: const EdgeInsets.only(
-                              right: 20, bottom: 10, top: 10),
-                          width: 80,
-                          decoration: BoxDecoration(
-                              color: selectedDay == today
-                                  ? AppColors.primaryColor
-                                  : Colors.white,
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10)),
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: const Offset(0, 1),
-                                  blurRadius: 5,
-                                  color: selectedDay == today
-                                      ? AppColors.primaryColor
-                                      : Colors.black54.withOpacity(.2),
-                                ),
-                              ]),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${consolidatedWeatherList[index]['the_temp']
-                                        .round()}C",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: selectedDay == today
-                                      ? Colors.white
-                                      : AppColors.primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Image.asset(
-                                'assets/' + weatherUrl + '.png',
-                                width: 30,
-                              ),
-                              Text(
-                                newDate,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: selectedDay == today
-                                      ? Colors.white
-                                      : AppColors.primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    }))
-          ],
-        ),
+          )
+        ],
+      )
+          : ExceptionWidget(
+        msg: homeModal.errorMessage.value,
+        retry: () {
+          homeModal.selectedCity.value = homeModal.userList[0].cityName;
+          homeModal.getWeatherForSpecific(
+              homeModal.userList[0].lat, homeModal.userList[0].lon);
+          homeModal.getWeatherForeCast(
+              homeModal.userList[0].lat, homeModal.userList[0].lon);
+        },
+      ),
       ),
     );
   }

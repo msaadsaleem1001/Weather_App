@@ -13,7 +13,6 @@ class SplashServices {
   List<DatabaseCityModal> userList = [];
 
   void isDefaultSelected() async{
-    // print(await db.deleteAll());
     userList = await db.getAllSelectedCities();
     Timer(const Duration(seconds: 3), (){
       if(userList.isEmpty){

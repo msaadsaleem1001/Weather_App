@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:weather_app/Res/GetX%20Localization/app_localization.dart';
+import 'package:weather_app/Res/MenuShape/menu_shape.dart';
 import 'package:weather_app/Res/Routes/app_routes.dart';
+import 'package:weather_app/Res/colors/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +24,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        popupMenuTheme: PopupMenuThemeData(
+            enableFeedback: false,
+            elevation: 0.0,
+            shape: const TooltipShape(),
+            surfaceTintColor: AppColors.white,
+            position: PopupMenuPosition.under),
       ),
       // home: const GetStarted(),
       getPages: AppRoutes.appRoutes(),

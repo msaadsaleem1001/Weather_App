@@ -1,6 +1,7 @@
 class AppAssets {
   static String alarm = 'assets/images/alarm.png';
   static String checked = 'assets/images/checked.png';
+  static String partially = 'assets/images/partially_sunny.jpg';
   static String clear = 'assets/images/clear.png';
   static String getStarted = 'assets/images/get-started.png';
   static String hail = 'assets/images/hail.png';
@@ -16,6 +17,7 @@ class AppAssets {
   static String showers = 'assets/images/showers.png';
   static String sleet = 'assets/images/sleet.png';
   static String snow = 'assets/images/snow.png';
+  static String overcast = 'assets/images/overcast.png';
   static String thunderStorm = 'assets/images/thunderstorm.png';
   static String unChecked = 'assets/images/unchecked.png';
   static String windSpeed = 'assets/images/windspeed.png';

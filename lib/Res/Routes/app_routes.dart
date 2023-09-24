@@ -26,15 +26,12 @@ class AppRoutes{
       transitionDuration: const Duration(milliseconds: 600),
     ),
 
-    // GetPage(
-    //   name: RouteNames.detailScreen,
-    //   page: () => const DetailScreen(
-    //        consolidatedWeatherList: consolidatedWeatherList,
-    //        selectedId: selectedId, location: location
-    //   ),
-    //   transition: Transition.rightToLeftWithFade,
-    //   transitionDuration: const Duration(milliseconds: 600),
-    // ),
+    GetPage(
+      name: RouteNames.detailScreen,
+      page: () => const DetailScreen(),
+      transition: Transition.rightToLeftWithFade,
+      transitionDuration: const Duration(milliseconds: 600),
+    ),
 
     GetPage(
       name: RouteNames.searchScreen,
