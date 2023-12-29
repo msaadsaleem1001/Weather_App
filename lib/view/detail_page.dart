@@ -8,7 +8,7 @@ import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
 import 'package:weather_app/ViewModel/HomeModal/home_modal.dart';
 
 class DetailScreen extends StatefulWidget {
-  const DetailScreen({Key? key}) : super(key: key);
+  const DetailScreen({super.key});
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
@@ -18,7 +18,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    final height = MediaQuery.sizeOf(context).height * 1;
+    final width = MediaQuery.sizeOf(context).width * 1;
     return Scaffold(
       backgroundColor: AppColors.secondaryColor,
       appBar: AppBar(
@@ -39,8 +40,8 @@ class _DetailScreenState extends State<DetailScreen> {
             top: 10,
             left: 10,
             child: SizedBox(
-              height: 150,
-              width: 400,
+              height: height * .15,
+              width: width,
               child: Obx(() => ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: homeModal.foreCast.length,
@@ -58,7 +59,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         margin: const EdgeInsets.only(right: 20),
-                        width: 100,
+                        width: width * .3,
                         decoration: BoxDecoration(
                             color: index == homeModal.selectedIndex.value
                                 ? Colors.white
@@ -76,7 +77,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Obx(() => Text(
-                                "${homeModal.foreCast[index].tempF}C",
+                                "${homeModal.foreCast[index].tempF} C",
                                 style: AppTextStyles.montserratStyle(
                                     color: index == homeModal.selectedIndex.value
                                         ? Colors.blue
@@ -84,12 +85,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                     fontSize: 16)
                             )),
                             Obx(() => Image.asset(
-                              homeModal.foreCast[index].weather == ''
-                                  ?AppAssets.clear
-                                  : homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString(),
-                              width: 50,
-                              height: 50,
-                            )),
+                              homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())
+                                  ?homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString()
+                                  :AppAssets.errorImage,
+                              width: homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())? 50 : 20,
+                              height: homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())? 50 : 20,
+                            ),),
                             Obx(() => Text(
                                 homeModal.foreCast[index].date,
                                 style: AppTextStyles.montserratStyle(
@@ -109,8 +110,8 @@ class _DetailScreenState extends State<DetailScreen> {
             bottom: 0,
             left: 0,
             child: Container(
-              height: size.height * .6,
-              width: size.width,
+              height: height * .6,
+              width: width,
               decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -125,8 +126,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     right: 20,
                     left: 20,
                     child: Container(
-                      width: size.width * .7,
-                      height: 300,
+                      width: width,
+                      height: height * .35,
                       decoration: BoxDecoration(
                           gradient: const LinearGradient(
                               begin: Alignment.topLeft,
@@ -160,7 +161,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             bottom: 20,
                             left: 20,
                             child: Container(
-                              width: size.width * .8,
+                              width: width * .8,
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 20),
                               child: Row(
@@ -211,22 +212,20 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   ),
                   Positioned(
-                      top: 270,
-                      left: 20,
+                      left: 10,
+                      right: 10,
                       bottom: 10,
                       child: SizedBox(
-                        width: size.width*.9,
-                        height: 150,
+                        width: width,
+                        height: height * .27,
                         child: ListView.builder(
                             scrollDirection: Axis.vertical,
                             itemCount: homeModal.foreCast.length,
                             itemBuilder: (context, index) {
                               return Obx(() => Container(
-                                margin: const EdgeInsets.only(
-                                    top: 10,
-                                    bottom: 5),
+                                margin: const EdgeInsets.only(bottom: 10),
                                 height: 50,
-                                width: size.width,
+                                width: width,
                                 decoration: BoxDecoration(
                                     color: homeModal.selectedIndex.value == index
                                         ?AppColors.primaryColor

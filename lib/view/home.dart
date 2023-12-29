@@ -14,7 +14,7 @@ import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
 import 'package:weather_app/ViewModel/HomeModal/home_modal.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -41,7 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     //Create a size variable for the media query
-    Size screenSize = MediaQuery.of(context).size;
+    final height = MediaQuery.sizeOf(context).height * 1;
+    final width = MediaQuery.sizeOf(context).width * 1;
     Connectivity connectivity =  Connectivity() ;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0.0,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          width: screenSize.width,
+          width: width,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -141,18 +142,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: CheckInternetConnectionWidget(
                       snapshot: snapshot,
                       widget: const SizedBox(),
-                      screenSize: screenSize,
                     ),
                   ) ;
                 },
               ),
           ),
           Container(
-            padding: const EdgeInsets.only(
-              top: 30,
-              left: 20,
-              right: 20,
-              bottom: 10
+            padding: EdgeInsets.only(
+              top: height * .02,
+              left: width * .05,
+              right: width * .05,
+              bottom: height * .02,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,12 +167,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   'Last Updated: ${homeModal.currentWeather[0].lastUpdated}',
                   style: AppTextStyles.readableStyle(14),
                 )),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: height * .02,
                 ),
                 Container(
-                  width: screenSize.width,
-                  height: 200,
+                  width: width,
+                  height: height * .25,
                   decoration: BoxDecoration(
                       color: AppColors.primaryColor,
                       borderRadius: BorderRadius.circular(15),
@@ -250,11 +250,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: height * .03,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  padding: EdgeInsets.symmetric(horizontal: width * .05),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -278,8 +278,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 30,
+                SizedBox(
+                  height: height * .02,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   vertical: 10),
                               margin: const EdgeInsets.only(
                                   right: 20, bottom: 10, top: 10),
-                              width: 100,
+                              width: width * .3,
                               decoration: BoxDecoration(
                                   color: index == 0
                                       ? AppColors.primaryColor
@@ -355,18 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                               .primaryColor,
                                           fontSize: 16)),
                                   Image.asset(
-                                    homeModal.foreCast[index]
-                                        .weather ==
-                                        ''
-                                        ? AppAssets.clear
-                                        : homeModal
-                                        .weatherImg[homeModal
-                                        .foreCast[index]
-                                        .weather
-                                        .toString()]
-                                        .toString(),
-                                    width: 50,
-                                    height: 50,
+                                    homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())
+                                        ?homeModal.weatherImg[homeModal.foreCast[index].weather.toString()].toString()
+                                        :AppAssets.errorImage,
+                                    width: homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())? 50 : 20,
+                                    height: homeModal.weatherImg.containsKey(homeModal.foreCast[index].weather.toString())? 50 : 20,
                                   ),
                                   Text(
                                       homeModal

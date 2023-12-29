@@ -8,16 +8,16 @@ import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
 class CheckInternetConnectionWidget extends StatelessWidget {
   final AsyncSnapshot<ConnectivityResult> snapshot;
   final Widget widget ;
-  final Size screenSize;
   const CheckInternetConnectionWidget({
-    Key? key,
+    super.key,
     required this.snapshot,
     required this.widget,
-    required this.screenSize
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.sizeOf(context).height * 1;
+    final width = MediaQuery.sizeOf(context).width * 1;
     switch (snapshot.connectionState) {
       case ConnectionState.active:
         final state = snapshot.data!;
@@ -25,8 +25,8 @@ class CheckInternetConnectionWidget extends StatelessWidget {
           case ConnectivityResult.none:
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 15),
-              height: screenSize.height*.03,
-              width: screenSize.width*.9,
+              height: height * .03,
+              width: width * .9,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
                 color: AppColors.error,

@@ -31,7 +31,9 @@ class HomeModal extends GetxController{
     'sunny': AppAssets.clear,
     'psbl_rain': AppAssets.showers,
     'overcast': AppAssets.overcast,
-    'rain_shower': AppAssets.lightRain
+    'rain_shower': AppAssets.rainShower,
+    'light_rain': AppAssets.lightRain,
+    'rain': AppAssets.rain
   };
 
   void setRxStatusCode(Status value) => rxStatusCode.value = value;
@@ -120,12 +122,12 @@ class HomeModal extends GetxController{
       setRxStatusCode(Status.COMPLETED);
       foreCast.clear();
       for(var val in value['daily']['data']){
-        debugPrint(val['weather']);
+        // debugPrint(val['weather'].toString());
         foreCast.add(
             ForeCastWeatherModal(
                 date: val['day'].toString(),
-                weather: val['weather'],
-                summary: val['summary'],
+                weather: val['weather'].toString(),
+                summary: val['summary'].toString(),
                 tempF: val['temperature'].toString(),
                 tempMin: val['temperature_min'].toString(),
                 tempMax: val['temperature_max'].toString(),
@@ -136,7 +138,6 @@ class HomeModal extends GetxController{
             ));
         foreCast.refresh();
       }
-      // debugPrint('Json result: ${foreCast[1].summary}');
     }).onError((error, stackTrace) {
       setRxStatusCode(Status.ERROR);
       errorMessage.value = error.toString();

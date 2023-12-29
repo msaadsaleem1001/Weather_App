@@ -26,6 +26,8 @@ class SelectionViewModel extends GetxController{
   void setCountryName(String val) => countryName.value = val;
 
   void citiesSearchListApi(){
+    searchedCityList.clear();
+    setRxStatusCode(Status.LOADING);
     cityRepository.getCities(countryCode.value).then((value) {
       setRxStatusCode(Status.COMPLETED);
       searchCityList.value = List.from(value).toList();

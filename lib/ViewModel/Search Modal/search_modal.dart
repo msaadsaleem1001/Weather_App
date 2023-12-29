@@ -18,6 +18,7 @@ class SearchViewModel extends GetxController{
   void setRxStatusCode(Status value) => rxStatusCode.value = value;
 
   void countriesSearchListApi(){
+    setRxStatusCode(Status.LOADING);
     searchedCountryList.clear();
     searchCountryList.clear();
     countryRepository.getCountries().then((value) {

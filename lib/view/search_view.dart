@@ -68,10 +68,10 @@ class _CitySearchState extends State<CitySearch> with TickerProviderStateMixin {
         }),
         actions: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: InkWell(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: IconButton(
                 enableFeedback: false,
-                onTap: () {
+                onPressed: () {
                   Utils utils = Utils();
                   utils.showBottomSheet(
                     context,
@@ -79,11 +79,8 @@ class _CitySearchState extends State<CitySearch> with TickerProviderStateMixin {
                     animationController,
                   );
                 },
-                child: Obx(() => Text(
-                      controllerSelectionModal.countryCode.value,
-                      style:
-                          AppTextStyles.headerTextStyle(color: AppColors.white),
-                    ))),
+                icon: Icon(Icons.search_rounded,
+                    size: 25, color: AppColors.white)),
           ),
         ],
       ),

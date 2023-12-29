@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:weather_app/Res/Routes/app_routes.dart';
+import 'package:weather_app/Res/Routes/routes_names.dart';
 import 'package:weather_app/Res/assets/app_assets.dart';
 import 'package:weather_app/Res/colors/app_colors.dart';
 import 'package:weather_app/Res/text%20styles/app_text_styles.dart';
@@ -40,7 +42,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.secondaryColor,
         title: Obx(
-          () => Text(
+              () => Text(
             '${controller.geterSelectedCities.value} Selected',
             style: AppTextStyles.montserratStyle(
                 color: AppColors.white, fontSize: 18),
@@ -52,7 +54,7 @@ class _SelectionScreenState extends State<SelectionScreen> {
             child: IconButton(
                 enableFeedback: false,
                 onPressed: () {
-                  Get.to(const CitySearch());
+                  Get.toNamed(RouteNames.searchScreen);
                 },
                 icon: Icon(Icons.search_rounded,
                     size: 25, color: AppColors.white)),

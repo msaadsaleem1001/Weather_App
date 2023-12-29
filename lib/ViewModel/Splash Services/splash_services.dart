@@ -14,7 +14,7 @@ class SplashServices {
 
   void isDefaultSelected() async{
     userList = await db.getAllSelectedCities();
-    Timer(const Duration(seconds: 3), (){
+    Timer(const Duration(seconds: 2), (){
       if(userList.isEmpty){
         Get.toNamed(RouteNames.selectionScreen);
       }
