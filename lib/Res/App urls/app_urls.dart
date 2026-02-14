@@ -5,15 +5,15 @@ class AppUrls{
   static const String myApi = 'Your API key';
 
 
-  static const String getWeatherForSpecificPlace = 'Url';
+  static const String getWeatherForSpecificPlace = 'Your Url';
 
 
-  static const String getWeatherForCast21DaysSpecificPlace = 'Url';
+  static const String getWeatherForCast21DaysSpecificPlace = 'Your Url';
 
 
-  static const String countrySearchApi = 'Url';
+  static const String countrySearchApi = 'Your Url';
 
 
-  static const String citySearchApi = 'Url';
+  static const String citySearchApi = 'Your Url';
 
 }
