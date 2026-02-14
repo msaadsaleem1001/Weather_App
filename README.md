@@ -1,16 +1,46 @@
-# weather_app
+# 🌦 Weather App (Flutter)
 
-Flutter portfolio project.
+A modern, responsive Weather Application built with Flutter that provides real-time weather updates and multi-day forecasts based on user location.
 
-## Getting Started
+## 🚀 Overview
+This application fetches live weather data from a REST API and displays current conditions, temperature, and forecast information in a clean and user-friendly interface. The app follows clean architecture principles and ensures smooth performance with proper state management and optimized API handling.
 
-This project is a starting point for a Flutter application.
+## ✨ Features
+- Real-time current weather updates
+- 5–7 day forecast display
+- Location-based weather retrieval
+- API integration with JSON parsing
+- Proper error handling and loading states
+- Responsive UI for different screen sizes
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Tech Stack
+- Flutter & Dart
+- RESTful API Integration
+- HTTP package
+- State Management (Provider / Bloc / Riverpod)
+- Clean Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🏗 Project Structure
+The application is structured with clear separation of concerns:
+- UI Layer (Screens & Widgets)
+- Service Layer (API Integration)
+- Model Layer (Data Handling)
+- State Management Layer
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ▶ Getting Started
+1. Clone the repository  
+   `git clone https://github.com/msaadsaleem1001/Weather_App.git`
+
+2. Install dependencies  
+   `flutter pub get`
+
+3. Add your API key in the constants file  
+
+4. Run the application  
+   `flutter run`
+
+---
+
+👨‍💻 Developed by Saad Saleem  
+Flutter Developer  
+GitHub: https://github.com/msaadsaleem1001
